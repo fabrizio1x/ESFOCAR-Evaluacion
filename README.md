@@ -32,7 +32,8 @@ La solución está diseñada con enfoque Offline-First, permitiendo operar con n
 ---
 
 ## Tablero de Tareas
-* Jira: (Enlace pendiente)
+* Jira: [Tablero de Planificación — Proyecto ESF](https://duocuc-team-smru6pl9.atlassian.net/jira/software/projects/ESF/boards/2)
+
 
 ---
 
