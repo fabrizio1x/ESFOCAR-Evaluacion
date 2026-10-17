@@ -2,10 +2,29 @@ package com.duoc.esfocar.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val VerdeInstitucional = Color(0xFF1E5631)
+val VerdeInstitucionalOscuro = Color(0xFF134223)
+val VerdeInstitucionalClaro = Color(0xFF4C8C65)
+val VerdeContenedor = Color(0xFFD4EED8)
+val SobreVerdeContenedor = Color(0xFF00210C)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val VerdeLaurel = Color(0xFF386641)
+val VerdeLaurelClaro = Color(0xFF6A994E)
+val LaurelContenedor = Color(0xFFDDE7C7)
+val SobreLaurelContenedor = Color(0xFF16200A)
+
+val Aprobado = Color(0xFF2E7D32)
+val Reprobado = Color(0xFFC62828)
+val Pendiente = Color(0xFFF9A825)
+
+val FondoClaro = Color(0xFFF8FAF7)
+val SuperficieClara = Color(0xFFFFFFFF)
+val TextoPrincipalClaro = Color(0xFF191C19)
+val TextoSecundarioClaro = Color(0xFF414942)
+val BordeClaro = Color(0xFF717971)
+
+val FondoOscuro = Color(0xFF111411)
+val SuperficieOscura = Color(0xFF191C19)
+val TextoPrincipalOscuro = Color(0xFFE1E3DF)
+val TextoSecundarioOscuro = Color(0xFFC0C9C0)
+val BordeOscuro = Color(0xFF8A938B)

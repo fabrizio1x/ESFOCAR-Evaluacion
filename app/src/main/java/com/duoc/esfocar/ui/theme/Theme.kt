@@ -1,6 +1,5 @@
 package com.duoc.esfocar.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,35 +8,49 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = VerdeInstitucionalClaro,
+    onPrimary = Color.Black,
+    primaryContainer = VerdeInstitucionalOscuro,
+    onPrimaryContainer = VerdeContenedor,
+    secondary = VerdeLaurelClaro,
+    onSecondary = Color.Black,
+    secondaryContainer = VerdeLaurel,
+    onSecondaryContainer = LaurelContenedor,
+    background = FondoOscuro,
+    onBackground = TextoPrincipalOscuro,
+    surface = SuperficieOscura,
+    onSurface = TextoPrincipalOscuro,
+    surfaceVariant = Color(0xFF2D322E),
+    onSurfaceVariant = TextoSecundarioOscuro,
+    outline = BordeOscuro
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = VerdeInstitucional,
     onPrimary = Color.White,
+    primaryContainer = VerdeContenedor,
+    onPrimaryContainer = SobreVerdeContenedor,
+    secondary = VerdeLaurel,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondaryContainer = LaurelContenedor,
+    onSecondaryContainer = SobreLaurelContenedor,
+    background = FondoClaro,
+    onBackground = TextoPrincipalClaro,
+    surface = SuperficieClara,
+    onSurface = TextoPrincipalClaro,
+    surfaceVariant = Color(0xFFE0E5E0),
+    onSurfaceVariant = TextoSecundarioClaro,
+    outline = BordeClaro
 )
 
 @Composable
 fun AppEsfocar_Grupo15Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -45,7 +58,6 @@ fun AppEsfocar_Grupo15Theme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
