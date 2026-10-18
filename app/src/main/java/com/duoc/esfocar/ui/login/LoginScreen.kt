@@ -29,10 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -44,14 +40,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
+import com.duoc.esfocar.viewmodel.LoginViewModel
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit = { _, _ -> }
+    viewModel: LoginViewModel,
+    onLoginClick: () -> Unit = {}
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -121,8 +116,8 @@ fun LoginScreen(
                     )
 
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
+                        value = viewModel.correo,
+                        onValueChange = { viewModel.onCorreoChange(it) },
                         label = { Text("Correo institucional") },
                         placeholder = { Text("docente@esfocar.cl") },
                         leadingIcon = {
@@ -131,6 +126,8 @@ fun LoginScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorCorreo != null,
+                        supportingText = viewModel.errorCorreo?.let { { Text(it) } },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
@@ -140,8 +137,8 @@ fun LoginScreen(
                     )
 
                     OutlinedTextField(
-                        value = password,
-                        onValueChange = { password = it },
+                        value = viewModel.contrasena,
+                        onValueChange = { viewModel.onContrasenaChange(it) },
                         label = { Text("Contraseña") },
                         leadingIcon = {
                             Icon(
@@ -149,6 +146,8 @@ fun LoginScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorContrasena != null,
+                        supportingText = viewModel.errorContrasena?.let { { Text(it) } },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
@@ -158,8 +157,17 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    viewModel.errorCredenciales?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
                     Button(
-                        onClick = { onLoginClick(email, password) },
+                        onClick = onLoginClick,
+                        enabled = viewModel.botonHabilitado,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -190,7 +198,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreviewClaro() {
     AppEsfocar_Grupo15Theme(darkTheme = false) {
-        LoginScreen()
+        LoginScreen(viewModel = LoginViewModel())
     }
 }
 
@@ -198,6 +206,6 @@ fun LoginScreenPreviewClaro() {
 @Composable
 fun LoginScreenPreviewOscuro() {
     AppEsfocar_Grupo15Theme(darkTheme = true) {
-        LoginScreen()
+        LoginScreen(viewModel = LoginViewModel())
     }
 }
