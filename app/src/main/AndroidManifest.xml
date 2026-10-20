@@ -24,6 +24,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.register.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppEsfocar_Grupo15"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".ui.home.HomeActivity"
             android:exported="false"
             android:theme="@style/Theme.AppEsfocar_Grupo15" />

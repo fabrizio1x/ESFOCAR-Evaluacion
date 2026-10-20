@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.duoc.esfocar.ui.home.HomeActivity
 import com.duoc.esfocar.ui.login.LoginScreen
+import com.duoc.esfocar.ui.register.RegisterActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.LoginViewModel
 
@@ -31,6 +32,9 @@ class MainActivity : ComponentActivity() {
                             startActivity(intent)
                             finish()
                         }
+                    },
+                    onRegisterClick = {
+                        startActivity(Intent(this, RegisterActivity::class.java))
                     }
                 )
             }
