@@ -36,6 +36,11 @@
             android:name=".ui.rubricas.RubricasActivity"
             android:exported="false"
             android:theme="@style/Theme.AppEsfocar_Grupo15" />
+        <activity
+            android:name=".ui.evaluacion.EvaluacionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppEsfocar_Grupo15"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
