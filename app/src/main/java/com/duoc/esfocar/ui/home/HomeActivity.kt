@@ -80,6 +80,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.MainActivity
+import com.duoc.esfocar.ui.rubricas.RubricasActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -270,7 +271,7 @@ fun HomeScreen(
             if (tabSeleccionada == HomeTab.EVALUACIONES) {
                 FloatingActionButton(
                     onClick = {
-                        Toast.makeText(context, "Iniciando nueva evaluación práctica", Toast.LENGTH_SHORT).show()
+                        context.startActivity(Intent(context, RubricasActivity::class.java))
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
