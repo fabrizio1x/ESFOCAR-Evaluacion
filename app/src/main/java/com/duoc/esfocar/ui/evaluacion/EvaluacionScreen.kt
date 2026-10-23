@@ -1,6 +1,13 @@
 package com.duoc.esfocar.ui.evaluacion
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +28,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -86,6 +94,26 @@ fun EvaluacionScreen(
         }
         floor(suma * 100.0) / 100.0
     }
+
+    val colorContenedorNota by animateColorAsState(
+        targetValue = if (notaCalculada >= 4.0) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.errorContainer
+        },
+        animationSpec = tween(durationMillis = 350),
+        label = "AnimacionColorContenedor"
+    )
+
+    val colorTextoNota by animateColorAsState(
+        targetValue = if (notaCalculada >= 4.0) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.error
+        },
+        animationSpec = tween(durationMillis = 350),
+        label = "AnimacionColorTexto"
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -202,11 +230,7 @@ fun EvaluacionScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (notaCalculada >= 4.0) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.errorContainer
-                    }
+                    containerColor = colorContenedorNota
                 ),
                 shape = RoundedCornerShape(14.dp)
             ) {
@@ -222,20 +246,12 @@ fun EvaluacionScreen(
                             text = "Calificación Práctica",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = if (notaCalculada >= 4.0) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onErrorContainer
-                            }
+                            color = colorTextoNota
                         )
                         Text(
                             text = if (notaCalculada >= 4.0) "Condición: Aprobado" else "Condición: No Aprobado",
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (notaCalculada >= 4.0) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onErrorContainer
-                            }
+                            color = colorTextoNota
                         )
                     }
 
@@ -243,11 +259,7 @@ fun EvaluacionScreen(
                         text = String.format(Locale.US, "%.2f", notaCalculada),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = if (notaCalculada >= 4.0) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        }
+                        color = colorTextoNota
                     )
                 }
             }
@@ -292,6 +304,36 @@ fun EvaluacionScreen(
                         maxLines = 5,
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = errorAspirante || errorObservaciones,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Warning,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Text(
+                            text = "Complete el nombre del aspirante y las observaciones requeridas.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
 
