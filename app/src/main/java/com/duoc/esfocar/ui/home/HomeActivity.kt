@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
@@ -46,6 +47,7 @@ import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,8 +63,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -132,13 +136,16 @@ data class DocumentoItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    nombre: String,
-    correo: String,
+    nombre: String = "",
+    correo: String = "",
     onCerrarSesion: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var tabSeleccionada by rememberSaveable { mutableStateOf(HomeTab.EVALUACIONES) }
     var menuDesplegado by remember { mutableStateOf(false) }
+    var nombreUsuario by rememberSaveable { mutableStateOf(if (nombre.isNotBlank()) nombre else "Docente") }
+    var sedeUsuario by rememberSaveable { mutableStateOf("Santiago") }
+    var cargoUsuario by rememberSaveable { mutableStateOf("Instructor") }
 
     val documentos = remember {
         mutableStateListOf(
@@ -219,7 +226,7 @@ fun HomeScreen(
                             text = {
                                 Column {
                                     Text(
-                                        text = if (nombre.isNotEmpty()) nombre else "Docente Evaluador",
+                                        text = nombreUsuario,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     Text(
@@ -292,7 +299,7 @@ fun HomeScreen(
                 label = "CambioPestana"
             ) { pestana ->
                 when (pestana) {
-                    HomeTab.EVALUACIONES -> TabEvaluaciones(nombre = nombre)
+                    HomeTab.EVALUACIONES -> TabEvaluaciones(nombre = nombreUsuario)
                     HomeTab.DOCUMENTOS -> TabDocumentos(
                         documentos = documentos,
                         onCargarClick = {
@@ -313,8 +320,16 @@ fun HomeScreen(
                         }
                     )
                     HomeTab.PERFIL -> TabPerfil(
-                        nombre = nombre,
+                        nombre = nombreUsuario,
                         correo = correo,
+                        sede = sedeUsuario,
+                        cargo = cargoUsuario,
+                        onGuardarPerfil = { nuevoNombre, nuevaSede, nuevoCargo ->
+                            nombreUsuario = nuevoNombre
+                            sedeUsuario = nuevaSede
+                            cargoUsuario = nuevoCargo
+                            Toast.makeText(context, "Datos de usuario actualizados correctamente", Toast.LENGTH_SHORT).show()
+                        },
                         onCerrarSesion = onCerrarSesion
                     )
                 }
@@ -590,11 +605,95 @@ fun TabDocumentos(
 }
 
 @Composable
+fun EditarPerfilDialog(
+    nombreActual: String,
+    sedeActual: String,
+    cargoActual: String,
+    onDismissRequest: () -> Unit,
+    onConfirmarEdicion: (nombre: String, sede: String, cargo: String) -> Unit
+) {
+    var nombre by remember { mutableStateOf(nombreActual) }
+    var sede by remember { mutableStateOf(sedeActual) }
+    var cargo by remember { mutableStateOf(cargoActual) }
+
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(
+                text = "Editar Perfil",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = cargo,
+                    onValueChange = { cargo = it },
+                    label = { Text("Rol") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = sede,
+                    onValueChange = { sede = it },
+                    label = { Text("Sede") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (nombre.isNotBlank() && sede.isNotBlank() && cargo.isNotBlank()) {
+                        onConfirmarEdicion(nombre.trim(), sede.trim(), cargo.trim())
+                    }
+                }
+            ) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
 fun TabPerfil(
     nombre: String,
     correo: String,
+    sede: String,
+    cargo: String,
+    onGuardarPerfil: (nombre: String, sede: String, cargo: String) -> Unit,
     onCerrarSesion: () -> Unit
 ) {
+    var mostrarDialogoEditar by remember { mutableStateOf(false) }
+
+    if (mostrarDialogoEditar) {
+        EditarPerfilDialog(
+            nombreActual = nombre,
+            sedeActual = sede,
+            cargoActual = cargo,
+            onDismissRequest = { mostrarDialogoEditar = false },
+            onConfirmarEdicion = { nuevoNombre, nuevaSede, nuevoCargo ->
+                mostrarDialogoEditar = false
+                onGuardarPerfil(nuevoNombre, nuevaSede, nuevoCargo)
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -623,7 +722,7 @@ fun TabPerfil(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = if (nombre.isNotEmpty()) nombre else "Docente Evaluador",
+            text = if (nombre.isNotEmpty()) nombre else "Docente",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -650,21 +749,41 @@ fun TabPerfil(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "Institución: Escuela de Formación (ESFOCAR)",
+                    text = "Institución: ESFOCAR",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Rol: Docente Evaluador / Instructor",
+                    text = "Rol: $cargo",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "Sede: Santiago (Central)",
+                    text = "Sede: $sede",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = { mostrarDialogoEditar = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Editar perfil",
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = onCerrarSesion,
