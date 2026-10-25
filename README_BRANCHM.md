@@ -1,3 +1,4 @@
+v.1
 - Modelos de dominio Rubrica y Criterio (desacoplados de la UI)
 - RubricaRepository con datos de:
   - Procedimientos Policiales (Control/Detención, Inspección Vehicular)
