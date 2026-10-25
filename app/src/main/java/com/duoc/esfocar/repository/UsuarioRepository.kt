@@ -15,4 +15,8 @@ class UsuarioRepository {
             it.correo.equals(correo.trim(), ignoreCase = true) && it.contrasena == contrasena
         }
     }
+
+    val repo = RubricaRepository()
+    val rubricas = repo.obtenerRubricas()
+    val criterios = repo.obtenerCriteriosPorRubrica(1) // criterios de RUB-PP-01
 }
