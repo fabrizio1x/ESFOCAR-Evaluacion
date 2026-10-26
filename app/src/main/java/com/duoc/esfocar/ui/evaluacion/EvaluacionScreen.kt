@@ -63,6 +63,7 @@ import com.duoc.esfocar.ui.rubricas.RubricaItem
 import com.duoc.esfocar.ui.rubricas.RubricasDemoData
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.CalculadoraNotas
+import com.duoc.esfocar.viewmodel.ValidadorEvaluacion
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,8 +75,8 @@ fun EvaluacionScreen(
 ) {
     var nombreAspirante by remember { mutableStateOf("") }
     var observaciones by remember { mutableStateOf("") }
-    var errorAspirante by remember { mutableStateOf(false) }
-    var errorObservaciones by remember { mutableStateOf(false) }
+    var errorAspirante by remember { mutableStateOf<String?>(null) }
+    var errorObservaciones by remember { mutableStateOf<String?>(null) }
     var mostrarDialogoExito by remember { mutableStateOf(false) }
 
     val puntajes = remember {
@@ -189,17 +190,15 @@ fun EvaluacionScreen(
                         value = nombreAspirante,
                         onValueChange = {
                             nombreAspirante = it
-                            if (it.isNotBlank()) errorAspirante = false
+                            if (errorAspirante != null) errorAspirante = ValidadorEvaluacion.validarAspirante(it)
                         },
                         label = { Text("Nombre del Aspirante / Alumno") },
                         placeholder = { Text("Ej. Aspirante Morales, R.") },
                         leadingIcon = {
                             Icon(Icons.Filled.Person, contentDescription = null)
                         },
-                        isError = errorAspirante,
-                        supportingText = if (errorAspirante) {
-                            { Text("Debe ingresar el nombre del aspirante") }
-                        } else null,
+                        isError = errorAspirante != null,
+                        supportingText = errorAspirante?.let { { Text(it) } },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -287,14 +286,12 @@ fun EvaluacionScreen(
                         value = observaciones,
                         onValueChange = {
                             observaciones = it
-                            if (it.isNotBlank()) errorObservaciones = false
+                            if (errorObservaciones != null) errorObservaciones = ValidadorEvaluacion.validarRetroalimentacion(it)
                         },
                         label = { Text("Observaciones y recomendaciones") },
                         placeholder = { Text("Ej. El aspirante aplicó correctamente el protocolo de aproximación...") },
-                        isError = errorObservaciones,
-                        supportingText = if (errorObservaciones) {
-                            { Text("La retroalimentación del docente es obligatoria") }
-                        } else null,
+                        isError = errorObservaciones != null,
+                        supportingText = errorObservaciones?.let { { Text(it) } },
                         minLines = 3,
                         maxLines = 5,
                         modifier = Modifier.fillMaxWidth()
@@ -303,7 +300,7 @@ fun EvaluacionScreen(
             }
 
             AnimatedVisibility(
-                visible = errorAspirante || errorObservaciones,
+                visible = errorAspirante != null || errorObservaciones != null,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
@@ -334,13 +331,10 @@ fun EvaluacionScreen(
 
             Button(
                 onClick = {
-                    val aspiranteValido = nombreAspirante.isNotBlank()
-                    val obsValida = observaciones.isNotBlank()
+                    errorAspirante = ValidadorEvaluacion.validarAspirante(nombreAspirante)
+                    errorObservaciones = ValidadorEvaluacion.validarRetroalimentacion(observaciones)
 
-                    errorAspirante = !aspiranteValido
-                    errorObservaciones = !obsValida
-
-                    if (aspiranteValido && obsValida) {
+                    if (ValidadorEvaluacion.puedeGuardar(nombreAspirante, observaciones)) {
                         mostrarDialogoExito = true
                     }
                 },
