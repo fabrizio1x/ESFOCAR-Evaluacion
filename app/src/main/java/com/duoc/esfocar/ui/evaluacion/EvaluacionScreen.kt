@@ -62,8 +62,8 @@ import com.duoc.esfocar.ui.rubricas.CriterioItem
 import com.duoc.esfocar.ui.rubricas.RubricaItem
 import com.duoc.esfocar.ui.rubricas.RubricasDemoData
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
+import com.duoc.esfocar.viewmodel.CalculadoraNotas
 import java.util.Locale
-import kotlin.math.floor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,17 +86,12 @@ fun EvaluacionScreen(
         }
     }
 
-    val notaCalculada: Double = run {
-        var suma = 0.0
-        rubrica.criterios.forEach { crit ->
-            val p = puntajes[crit.id] ?: 1.0
-            suma += p * (crit.ponderacion / 100.0)
-        }
-        floor(suma * 100.0) / 100.0
-    }
+    val notaCalculada: Double = CalculadoraNotas.calcularPromedioPonderado(
+        rubrica.criterios.map { crit -> Pair(puntajes[crit.id] ?: 1.0, crit.ponderacion) }
+    )
 
     val colorContenedorNota by animateColorAsState(
-        targetValue = if (notaCalculada >= 4.0) {
+        targetValue = if (CalculadoraNotas.estaAprobado(notaCalculada)) {
             MaterialTheme.colorScheme.primaryContainer
         } else {
             MaterialTheme.colorScheme.errorContainer
@@ -106,7 +101,7 @@ fun EvaluacionScreen(
     )
 
     val colorTextoNota by animateColorAsState(
-        targetValue = if (notaCalculada >= 4.0) {
+        targetValue = if (CalculadoraNotas.estaAprobado(notaCalculada)) {
             MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.error
@@ -249,7 +244,7 @@ fun EvaluacionScreen(
                             color = colorTextoNota
                         )
                         Text(
-                            text = if (notaCalculada >= 4.0) "Condición: Aprobado" else "Condición: No Aprobado",
+                            text = if (CalculadoraNotas.estaAprobado(notaCalculada)) "Condición: Aprobado" else "Condición: No Aprobado",
                             style = MaterialTheme.typography.bodySmall,
                             color = colorTextoNota
                         )
