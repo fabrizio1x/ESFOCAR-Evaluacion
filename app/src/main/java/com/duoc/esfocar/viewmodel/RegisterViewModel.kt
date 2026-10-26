@@ -1,0 +1,97 @@
+package com.duoc.esfocar.viewmodel
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import com.duoc.esfocar.model.Usuario
+import com.duoc.esfocar.repository.UsuarioRepository
+
+class RegisterViewModel : ViewModel() {
+
+    private val repository = UsuarioRepository()
+
+    var nombre by mutableStateOf("")
+        private set
+    var apellido by mutableStateOf("")
+        private set
+    var correo by mutableStateOf("")
+        private set
+    var contrasena by mutableStateOf("")
+        private set
+    var confirmarContrasena by mutableStateOf("")
+        private set
+
+    var errorNombre by mutableStateOf<String?>(null)
+        private set
+    var errorApellido by mutableStateOf<String?>(null)
+        private set
+    var errorCorreo by mutableStateOf<String?>(null)
+        private set
+    var errorContrasena by mutableStateOf<String?>(null)
+        private set
+    var errorConfirmacion by mutableStateOf<String?>(null)
+        private set
+    var errorRegistro by mutableStateOf<String?>(null)
+        private set
+
+    val botonHabilitado: Boolean
+        get() = ValidadorRegistro.validarNombre(nombre) == null &&
+                ValidadorRegistro.validarNombre(apellido, "apellido") == null &&
+                ValidadorRegistro.validarCorreo(correo) == null &&
+                ValidadorRegistro.validarContrasena(contrasena) == null &&
+                ValidadorRegistro.validarConfirmacion(contrasena, confirmarContrasena) == null
+
+    fun onNombreChange(valor: String) {
+        nombre = valor
+        errorNombre = if (valor.isEmpty()) null else ValidadorRegistro.validarNombre(valor)
+    }
+
+    fun onApellidoChange(valor: String) {
+        apellido = valor
+        errorApellido = if (valor.isEmpty()) null else ValidadorRegistro.validarNombre(valor, "apellido")
+    }
+
+    fun onCorreoChange(valor: String) {
+        correo = valor
+        errorCorreo = if (valor.isEmpty()) null else ValidadorRegistro.validarCorreo(valor)
+        errorRegistro = null
+    }
+
+    fun onContrasenaChange(valor: String) {
+        contrasena = valor
+        errorContrasena = if (valor.isEmpty()) null else ValidadorRegistro.validarContrasena(valor)
+        if (confirmarContrasena.isNotEmpty()) {
+            errorConfirmacion = ValidadorRegistro.validarConfirmacion(valor, confirmarContrasena)
+        }
+    }
+
+    fun onConfirmarContrasenaChange(valor: String) {
+        confirmarContrasena = valor
+        errorConfirmacion = if (valor.isEmpty()) null else ValidadorRegistro.validarConfirmacion(contrasena, valor)
+    }
+
+    fun registrar(): Usuario? {
+        errorNombre = ValidadorRegistro.validarNombre(nombre)
+        errorApellido = ValidadorRegistro.validarNombre(apellido, "apellido")
+        errorCorreo = ValidadorRegistro.validarCorreo(correo)
+        errorContrasena = ValidadorRegistro.validarContrasena(contrasena)
+        errorConfirmacion = ValidadorRegistro.validarConfirmacion(contrasena, confirmarContrasena)
+        if (errorNombre != null || errorApellido != null || errorCorreo != null ||
+            errorContrasena != null || errorConfirmacion != null
+        ) return null
+
+        if (repository.existeCorreo(correo)) {
+            errorRegistro = "Ya existe una cuenta con este correo"
+            return null
+        }
+
+        val usuario = Usuario(
+            correo = correo.trim().lowercase(),
+            contrasena = contrasena,
+            nombre = "${nombre.trim()} ${apellido.trim()}"
+        )
+        repository.registrarUsuario(usuario)
+        return usuario
+    }
+}

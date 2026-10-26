@@ -32,10 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -47,18 +43,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
+import com.duoc.esfocar.viewmodel.RegisterViewModel
 
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    viewModel: RegisterViewModel,
+    onRegisterClick: () -> Unit = {},
     onBackToLoginClick: () -> Unit = {}
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var apellido by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var confirmarContrasena by remember { mutableStateOf("") }
-
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -128,8 +120,8 @@ fun RegisterScreen(
                     )
 
                     OutlinedTextField(
-                        value = nombre,
-                        onValueChange = { nombre = it },
+                        value = viewModel.nombre,
+                        onValueChange = { viewModel.onNombreChange(it) },
                         label = { Text("Nombre") },
                         placeholder = { Text("Ej. Juan") },
                         leadingIcon = {
@@ -138,6 +130,8 @@ fun RegisterScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorNombre != null,
+                        supportingText = viewModel.errorNombre?.let { { Text(it) } },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -147,8 +141,8 @@ fun RegisterScreen(
                     )
 
                     OutlinedTextField(
-                        value = apellido,
-                        onValueChange = { apellido = it },
+                        value = viewModel.apellido,
+                        onValueChange = { viewModel.onApellidoChange(it) },
                         label = { Text("Apellido") },
                         placeholder = { Text("Ej. Pérez") },
                         leadingIcon = {
@@ -157,6 +151,8 @@ fun RegisterScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorApellido != null,
+                        supportingText = viewModel.errorApellido?.let { { Text(it) } },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -166,8 +162,8 @@ fun RegisterScreen(
                     )
 
                     OutlinedTextField(
-                        value = correo,
-                        onValueChange = { correo = it },
+                        value = viewModel.correo,
+                        onValueChange = { viewModel.onCorreoChange(it) },
                         label = { Text("Correo institucional") },
                         placeholder = { Text("docente@esfocar.cl") },
                         leadingIcon = {
@@ -176,6 +172,8 @@ fun RegisterScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorCorreo != null,
+                        supportingText = viewModel.errorCorreo?.let { { Text(it) } },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
@@ -185,8 +183,8 @@ fun RegisterScreen(
                     )
 
                     OutlinedTextField(
-                        value = contrasena,
-                        onValueChange = { contrasena = it },
+                        value = viewModel.contrasena,
+                        onValueChange = { viewModel.onContrasenaChange(it) },
                         label = { Text("Contraseña") },
                         leadingIcon = {
                             Icon(
@@ -194,6 +192,8 @@ fun RegisterScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorContrasena != null,
+                        supportingText = viewModel.errorContrasena?.let { { Text(it) } },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
@@ -204,8 +204,8 @@ fun RegisterScreen(
                     )
 
                     OutlinedTextField(
-                        value = confirmarContrasena,
-                        onValueChange = { confirmarContrasena = it },
+                        value = viewModel.confirmarContrasena,
+                        onValueChange = { viewModel.onConfirmarContrasenaChange(it) },
                         label = { Text("Confirmar contraseña") },
                         leadingIcon = {
                             Icon(
@@ -213,6 +213,8 @@ fun RegisterScreen(
                                 contentDescription = null
                             )
                         },
+                        isError = viewModel.errorConfirmacion != null,
+                        supportingText = viewModel.errorConfirmacion?.let { { Text(it) } },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(
@@ -222,12 +224,19 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
 
+                    viewModel.errorRegistro?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Button(
-                        onClick = {
-                            onRegisterClick(nombre, apellido, correo, contrasena)
-                        },
+                        onClick = onRegisterClick,
+                        enabled = viewModel.botonHabilitado,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
@@ -269,7 +278,7 @@ fun RegisterScreen(
 @Composable
 fun RegisterScreenPreviewClaro() {
     AppEsfocar_Grupo15Theme(darkTheme = false) {
-        RegisterScreen()
+        RegisterScreen(viewModel = RegisterViewModel())
     }
 }
 
@@ -277,6 +286,6 @@ fun RegisterScreenPreviewClaro() {
 @Composable
 fun RegisterScreenPreviewOscuro() {
     AppEsfocar_Grupo15Theme(darkTheme = true) {
-        RegisterScreen()
+        RegisterScreen(viewModel = RegisterViewModel())
     }
 }
