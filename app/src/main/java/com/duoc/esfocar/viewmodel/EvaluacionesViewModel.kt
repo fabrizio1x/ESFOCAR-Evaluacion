@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.duoc.esfocar.data.EsfocarDatabase
 import com.duoc.esfocar.data.EvaluacionEntity
+import com.duoc.esfocar.recursos.MonitorRed
 import com.duoc.esfocar.repository.EvaluacionRepository
 import com.duoc.esfocar.ui.rubricas.RubricaItem
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,8 @@ class EvaluacionesViewModel(application: Application) : AndroidViewModel(applica
     )
 
     val evaluaciones: Flow<List<EvaluacionEntity>> = repository.evaluaciones
+
+    val hayConexion: Flow<Boolean> = MonitorRed(application).estado
 
     fun guardarEvaluacion(
         aspirante: String,

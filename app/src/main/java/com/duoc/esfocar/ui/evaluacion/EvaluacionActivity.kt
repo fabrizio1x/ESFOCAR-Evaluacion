@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.duoc.esfocar.ui.rubricas.RubricasDemoData
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.EvaluacionesViewModel
@@ -27,9 +29,12 @@ class EvaluacionActivity : ComponentActivity() {
             ?: RubricasDemoData.obtenerRubricasBase().first()
 
         setContent {
+            val hayConexion by evaluacionesViewModel.hayConexion.collectAsState(initial = true)
+
             AppEsfocar_Grupo15Theme {
                 EvaluacionScreen(
                     rubrica = rubrica,
+                    hayConexion = hayConexion,
                     onBackClick = {
                         finish()
                     },

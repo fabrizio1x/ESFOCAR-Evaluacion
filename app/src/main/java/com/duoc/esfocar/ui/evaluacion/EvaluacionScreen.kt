@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -84,6 +85,7 @@ import java.util.Locale
 @Composable
 fun EvaluacionScreen(
     rubrica: RubricaItem,
+    hayConexion: Boolean = true,
     onBackClick: () -> Unit = {},
     onGuardarEvaluacion: (String, Double, String, String?) -> Unit = { _, _, _, _ -> }
 ) {
@@ -188,6 +190,36 @@ fun EvaluacionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            AnimatedVisibility(
+                visible = !hayConexion,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.WifiOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                        Text(
+                            text = "Sin conexión: la evaluación se guardará en el teléfono y no se perderá.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -450,7 +482,11 @@ fun EvaluacionScreen(
                         Text("Evidencia fotográfica adjunta")
                     }
                     Text(
-                        text = "Registrada en almacenamiento local (Modo Terreno Offline).",
+                        text = if (hayConexion) {
+                            "Registrada en el almacenamiento local del dispositivo."
+                        } else {
+                            "Registrada en el teléfono (Modo Terreno sin conexión)."
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

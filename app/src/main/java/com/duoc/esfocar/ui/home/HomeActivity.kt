@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.UploadFile
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -112,12 +113,14 @@ class HomeActivity : ComponentActivity() {
 
         setContent {
             val evaluaciones by evaluacionesViewModel.evaluaciones.collectAsState(initial = emptyList())
+            val hayConexion by evaluacionesViewModel.hayConexion.collectAsState(initial = true)
 
             AppEsfocar_Grupo15Theme {
                 HomeScreen(
                     nombre = nombre,
                     correo = correo,
                     evaluaciones = evaluaciones,
+                    hayConexion = hayConexion,
                     onCerrarSesion = {
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
@@ -148,6 +151,7 @@ fun HomeScreen(
     nombre: String = "",
     correo: String = "",
     evaluaciones: List<EvaluacionEntity> = emptyList(),
+    hayConexion: Boolean = true,
     onCerrarSesion: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -311,7 +315,8 @@ fun HomeScreen(
                 when (pestana) {
                     HomeTab.EVALUACIONES -> TabEvaluaciones(
                         nombre = nombreUsuario,
-                        evaluaciones = evaluaciones
+                        evaluaciones = evaluaciones,
+                        hayConexion = hayConexion
                     )
                     HomeTab.DOCUMENTOS -> TabDocumentos(
                         documentos = documentos,
@@ -354,7 +359,8 @@ fun HomeScreen(
 @Composable
 fun TabEvaluaciones(
     nombre: String,
-    evaluaciones: List<EvaluacionEntity>
+    evaluaciones: List<EvaluacionEntity>,
+    hayConexion: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -382,22 +388,34 @@ fun TabEvaluaciones(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.WifiOff,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Modo Terreno Offline Activo",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                AnimatedContent(
+                    targetState = hayConexion,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "CambioEstadoRed"
+                ) { conectado ->
+                    val colorEstado = if (conectado) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (conectado) Icons.Filled.Wifi else Icons.Filled.WifiOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = colorEstado
+                        )
+                        Text(
+                            text = if (conectado) {
+                                "Conectado a la red"
+                            } else {
+                                val guardadas = if (evaluaciones.size == 1) "1 evaluación guardada" else "${evaluaciones.size} evaluaciones guardadas"
+                                "Modo Terreno sin conexión: $guardadas en el teléfono"
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorEstado,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
             }
         }
