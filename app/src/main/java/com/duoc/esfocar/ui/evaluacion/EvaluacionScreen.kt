@@ -1,6 +1,10 @@
 package com.duoc.esfocar.ui.evaluacion
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -8,6 +12,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
@@ -40,6 +46,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -50,14 +57,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import com.duoc.esfocar.recursos.EvidenciaFotografica
 import com.duoc.esfocar.ui.rubricas.CriterioItem
 import com.duoc.esfocar.ui.rubricas.RubricaItem
 import com.duoc.esfocar.ui.rubricas.RubricasDemoData
@@ -71,13 +85,42 @@ import java.util.Locale
 fun EvaluacionScreen(
     rubrica: RubricaItem,
     onBackClick: () -> Unit = {},
-    onGuardarEvaluacion: (String, Double, String) -> Unit = { _, _, _ -> }
+    onGuardarEvaluacion: (String, Double, String, String?) -> Unit = { _, _, _, _ -> }
 ) {
+    val context = LocalContext.current
     var nombreAspirante by remember { mutableStateOf("") }
     var observaciones by remember { mutableStateOf("") }
     var errorAspirante by remember { mutableStateOf<String?>(null) }
     var errorObservaciones by remember { mutableStateOf<String?>(null) }
     var mostrarDialogoExito by remember { mutableStateOf(false) }
+    var fotoRuta by rememberSaveable { mutableStateOf<String?>(null) }
+    var archivoPendiente by rememberSaveable { mutableStateOf<String?>(null) }
+    var errorCamara by remember { mutableStateOf<String?>(null) }
+
+    val launcherCamara = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { fotoTomada ->
+        if (fotoTomada) {
+            fotoRuta = archivoPendiente
+            errorCamara = null
+        }
+    }
+
+    fun abrirCamara() {
+        val archivo = EvidenciaFotografica.crearArchivo(context)
+        archivoPendiente = archivo.absolutePath
+        launcherCamara.launch(EvidenciaFotografica.obtenerUri(context, archivo))
+    }
+
+    val launcherPermisoCamara = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            abrirCamara()
+        } else {
+            errorCamara = "Debes permitir el uso de la cámara para adjuntar evidencia"
+        }
+    }
 
     val puntajes = remember {
         mutableStateMapOf<String, Double>().apply {
@@ -299,6 +342,23 @@ fun EvaluacionScreen(
                 }
             }
 
+            TarjetaEvidenciaFotografica(
+                fotoRuta = fotoRuta,
+                errorCamara = errorCamara,
+                onTomarFotoClick = {
+                    val permisoConcedido = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+
+                    if (permisoConcedido) {
+                        abrirCamara()
+                    } else {
+                        launcherPermisoCamara.launch(Manifest.permission.CAMERA)
+                    }
+                }
+            )
+
             AnimatedVisibility(
                 visible = errorAspirante != null || errorObservaciones != null,
                 enter = fadeIn() + expandVertically(),
@@ -386,6 +446,9 @@ fun EvaluacionScreen(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    if (fotoRuta != null) {
+                        Text("Evidencia fotográfica adjunta")
+                    }
                     Text(
                         text = "Registrada en almacenamiento local (Modo Terreno Offline).",
                         style = MaterialTheme.typography.bodySmall,
@@ -397,13 +460,80 @@ fun EvaluacionScreen(
                 Button(
                     onClick = {
                         mostrarDialogoExito = false
-                        onGuardarEvaluacion(nombreAspirante, notaCalculada, observaciones)
+                        onGuardarEvaluacion(nombreAspirante, notaCalculada, observaciones, fotoRuta)
                     }
                 ) {
                     Text("Aceptar y Salir")
                 }
             }
         )
+    }
+}
+
+@Composable
+fun TarjetaEvidenciaFotografica(
+    fotoRuta: String?,
+    errorCamara: String?,
+    onTomarFotoClick: () -> Unit
+) {
+    val miniatura = remember(fotoRuta) {
+        fotoRuta?.let { EvidenciaFotografica.cargarMiniatura(it) }
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Evidencia Fotográfica (opcional)",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Text(
+                text = "Registra con la cámara el resultado del ejercicio en terreno.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (miniatura != null) {
+                Image(
+                    bitmap = miniatura.asImageBitmap(),
+                    contentDescription = "Evidencia fotográfica",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
+
+            errorCamara?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            OutlinedButton(
+                onClick = onTomarFotoClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Icon(Icons.Filled.CameraAlt, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(if (miniatura != null) "Tomar otra foto" else "Tomar foto de evidencia")
+            }
+        }
     }
 }
 

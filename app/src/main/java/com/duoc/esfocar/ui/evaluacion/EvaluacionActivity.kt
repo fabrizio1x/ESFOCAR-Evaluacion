@@ -33,8 +33,8 @@ class EvaluacionActivity : ComponentActivity() {
                     onBackClick = {
                         finish()
                     },
-                    onGuardarEvaluacion = { aspirante, nota, observaciones ->
-                        evaluacionesViewModel.guardarEvaluacion(aspirante, rubrica, nota, observaciones) {
+                    onGuardarEvaluacion = { aspirante, nota, observaciones, fotoRuta ->
+                        evaluacionesViewModel.guardarEvaluacion(aspirante, rubrica, nota, observaciones, fotoRuta) {
                             Toast.makeText(
                                 this,
                                 "Evaluación de $aspirante guardada con nota $nota",

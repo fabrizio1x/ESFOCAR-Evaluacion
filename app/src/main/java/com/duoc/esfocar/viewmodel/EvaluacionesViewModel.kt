@@ -23,6 +23,7 @@ class EvaluacionesViewModel(application: Application) : AndroidViewModel(applica
         rubrica: RubricaItem,
         nota: Double,
         observaciones: String,
+        fotoRuta: String?,
         onGuardada: () -> Unit
     ) {
         viewModelScope.launch {
@@ -32,7 +33,8 @@ class EvaluacionesViewModel(application: Application) : AndroidViewModel(applica
                     rubricaId = rubrica.id,
                     rubricaTitulo = rubrica.titulo,
                     nota = nota,
-                    observaciones = observaciones.trim()
+                    observaciones = observaciones.trim(),
+                    fotoRuta = fotoRuta
                 )
             )
             onGuardada()
