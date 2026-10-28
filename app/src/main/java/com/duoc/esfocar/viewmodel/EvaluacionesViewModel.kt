@@ -21,6 +21,10 @@ class EvaluacionesViewModel(application: Application) : AndroidViewModel(applica
 
     val hayConexion: Flow<Boolean> = MonitorRed(application).estado
 
+    fun evaluacionesDe(aspirante: String): Flow<List<EvaluacionEntity>> {
+        return repository.evaluacionesDe(aspirante)
+    }
+
     fun guardarEvaluacion(
         aspirante: String,
         rubrica: RubricaItem,

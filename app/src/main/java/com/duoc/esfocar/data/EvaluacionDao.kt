@@ -13,4 +13,7 @@ interface EvaluacionDao {
 
     @Query("SELECT * FROM evaluaciones ORDER BY fecha DESC")
     fun obtenerTodas(): Flow<List<EvaluacionEntity>>
+
+    @Query("SELECT * FROM evaluaciones WHERE aspirante = :aspirante COLLATE NOCASE ORDER BY fecha DESC")
+    fun obtenerPorAspirante(aspirante: String): Flow<List<EvaluacionEntity>>
 }

@@ -88,6 +88,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.MainActivity
 import com.duoc.esfocar.data.EvaluacionEntity
+import com.duoc.esfocar.ui.aspirante.FichaAspiranteActivity
 import com.duoc.esfocar.ui.rubricas.RubricasActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.EvaluacionesViewModel
@@ -316,7 +317,12 @@ fun HomeScreen(
                     HomeTab.EVALUACIONES -> TabEvaluaciones(
                         nombre = nombreUsuario,
                         evaluaciones = evaluaciones,
-                        hayConexion = hayConexion
+                        hayConexion = hayConexion,
+                        onEvaluacionClick = { evaluacion ->
+                            val intent = Intent(context, FichaAspiranteActivity::class.java)
+                            intent.putExtra(FichaAspiranteActivity.EXTRA_ASPIRANTE, evaluacion.aspirante)
+                            context.startActivity(intent)
+                        }
                     )
                     HomeTab.DOCUMENTOS -> TabDocumentos(
                         documentos = documentos,
@@ -360,7 +366,8 @@ fun HomeScreen(
 fun TabEvaluaciones(
     nombre: String,
     evaluaciones: List<EvaluacionEntity>,
-    hayConexion: Boolean
+    hayConexion: Boolean,
+    onEvaluacionClick: (EvaluacionEntity) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -439,7 +446,8 @@ fun TabEvaluaciones(
                 aspirante = evaluacion.aspirante,
                 rubrica = evaluacion.rubricaTitulo,
                 calificacion = String.format(Locale.US, "%.2f", evaluacion.nota),
-                estado = if (evaluacion.aprobada) "Aprobado" else "No aprobado"
+                estado = if (evaluacion.aprobada) "Aprobado" else "No aprobado",
+                onClick = { onEvaluacionClick(evaluacion) }
             )
         }
     }
@@ -450,9 +458,11 @@ fun TarjetaEvaluacion(
     aspirante: String,
     rubrica: String,
     calificacion: String,
-    estado: String
+    estado: String,
+    onClick: () -> Unit = {}
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),

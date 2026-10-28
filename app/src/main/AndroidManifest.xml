@@ -48,6 +48,10 @@
             android:exported="false"
             android:theme="@style/Theme.AppEsfocar_Grupo15"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.aspirante.FichaAspiranteActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppEsfocar_Grupo15" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

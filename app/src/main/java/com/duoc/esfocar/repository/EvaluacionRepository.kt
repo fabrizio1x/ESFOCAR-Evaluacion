@@ -8,6 +8,10 @@ class EvaluacionRepository(private val dao: EvaluacionDao) {
 
     val evaluaciones: Flow<List<EvaluacionEntity>> = dao.obtenerTodas()
 
+    fun evaluacionesDe(aspirante: String): Flow<List<EvaluacionEntity>> {
+        return dao.obtenerPorAspirante(aspirante.trim())
+    }
+
     suspend fun guardar(evaluacion: EvaluacionEntity): Long {
         return dao.insertar(evaluacion)
     }
