@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -69,6 +70,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -84,8 +86,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.MainActivity
+import com.duoc.esfocar.data.EvaluacionEntity
 import com.duoc.esfocar.ui.rubricas.RubricasActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
+import com.duoc.esfocar.viewmodel.EvaluacionesViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -97,6 +101,8 @@ class HomeActivity : ComponentActivity() {
         const val EXTRA_CORREO = "correo"
     }
 
+    private val evaluacionesViewModel: EvaluacionesViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -105,10 +111,13 @@ class HomeActivity : ComponentActivity() {
         val correo = intent.getStringExtra(EXTRA_CORREO).orEmpty()
 
         setContent {
+            val evaluaciones by evaluacionesViewModel.evaluaciones.collectAsState(initial = emptyList())
+
             AppEsfocar_Grupo15Theme {
                 HomeScreen(
                     nombre = nombre,
                     correo = correo,
+                    evaluaciones = evaluaciones,
                     onCerrarSesion = {
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
@@ -138,6 +147,7 @@ data class DocumentoItem(
 fun HomeScreen(
     nombre: String = "",
     correo: String = "",
+    evaluaciones: List<EvaluacionEntity> = emptyList(),
     onCerrarSesion: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -299,7 +309,10 @@ fun HomeScreen(
                 label = "CambioPestana"
             ) { pestana ->
                 when (pestana) {
-                    HomeTab.EVALUACIONES -> TabEvaluaciones(nombre = nombreUsuario)
+                    HomeTab.EVALUACIONES -> TabEvaluaciones(
+                        nombre = nombreUsuario,
+                        evaluaciones = evaluaciones
+                    )
                     HomeTab.DOCUMENTOS -> TabDocumentos(
                         documentos = documentos,
                         onCargarClick = {
@@ -339,7 +352,10 @@ fun HomeScreen(
 }
 
 @Composable
-fun TabEvaluaciones(nombre: String) {
+fun TabEvaluaciones(
+    nombre: String,
+    evaluaciones: List<EvaluacionEntity>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -387,31 +403,27 @@ fun TabEvaluaciones(nombre: String) {
         }
 
         Text(
-            text = "Evaluaciones Recientes",
+            text = "Evaluaciones Recientes (${evaluaciones.size})",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
 
-        TarjetaEvaluacion(
-            aspirante = "Aspirante González, M.",
-            rubrica = "Control de Tránsito y Vehicular",
-            calificacion = "6.2",
-            estado = "Aprobado"
-        )
+        if (evaluaciones.isEmpty()) {
+            Text(
+                text = "Aún no hay evaluaciones guardadas. Usa el botón + para evaluar a un aspirante.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
 
-        TarjetaEvaluacion(
-            aspirante = "Aspirante Muñoz, C.",
-            rubrica = "Procedimientos de Seguridad y Tiro",
-            calificacion = "5.8",
-            estado = "Aprobado"
-        )
-
-        TarjetaEvaluacion(
-            aspirante = "Aspirante Morales, R.",
-            rubrica = "Control de Detención Policial",
-            calificacion = "Pendiente",
-            estado = "En curso"
-        )
+        evaluaciones.forEach { evaluacion ->
+            TarjetaEvaluacion(
+                aspirante = evaluacion.aspirante,
+                rubrica = evaluacion.rubricaTitulo,
+                calificacion = String.format(Locale.US, "%.2f", evaluacion.nota),
+                estado = if (evaluacion.aprobada) "Aprobado" else "No aprobado"
+            )
+        }
     }
 }
 
