@@ -23,6 +23,8 @@ class RegisterViewModel(private val repository: UsuarioRepository) : ViewModel()
         private set
     var confirmarContrasena by mutableStateOf("")
         private set
+    var esInstructor by mutableStateOf(false)
+        private set
 
     var errorNombre by mutableStateOf<String?>(null)
         private set
@@ -74,6 +76,10 @@ class RegisterViewModel(private val repository: UsuarioRepository) : ViewModel()
     fun onConfirmarContrasenaChange(valor: String) {
         confirmarContrasena = valor
         errorConfirmacion = if (valor.isEmpty()) null else ValidadorRegistro.validarConfirmacion(contrasena, valor)
+    }
+
+    fun onTipoCargoChange(valor: Boolean) {
+        esInstructor = valor
     }
 
     suspend fun registrar(): Usuario? {
