@@ -1,22 +1,22 @@
 package com.duoc.esfocar.repository
 
+import com.duoc.esfocar.data.UsuarioDao
+import com.duoc.esfocar.data.UsuarioEntity
 import com.duoc.esfocar.model.Usuario
 
-class UsuarioRepository {
+class UsuarioRepository(private val dao: UsuarioDao) {
 
-    private val usuarios = listOf(
-        Usuario("instructor@esfocar.cl", "instructor123", "Instructor Demo"),
-        Usuario("docente@esfocar.cl", "docente123", "Docente Demo"),
-        Usuario("evaluador@duocuc.cl", "evaluador123", "Evaluador Demo")
-    )
-
-    fun buscarUsuario(correo: String, contrasena: String): Usuario? {
-        return usuarios.find {
-            it.correo.equals(correo.trim(), ignoreCase = true) && it.contrasena == contrasena
-        }
+    suspend fun existeCorreo(correo: String): Boolean {
+        return dao.buscarPorCorreo(correo.trim()) != null
     }
 
-    val repo = RubricaRepository()
-    val rubricas = repo.obtenerRubricas()
-    val criterios = repo.obtenerCriteriosPorRubrica(1) // criterios de RUB-PP-01
+    suspend fun registrarUsuario(usuario: Usuario, contrasena: String) {
+        dao.insertar(UsuarioEntity.crear(usuario.correo, usuario.nombre, contrasena))
+    }
+
+    suspend fun buscarUsuario(correo: String, contrasena: String): Usuario? {
+        val encontrado = dao.buscarPorCorreo(correo.trim()) ?: return null
+        if (!encontrado.contrasenaCorrecta(contrasena)) return null
+        return Usuario(correo = encontrado.correo, nombre = encontrado.nombre)
+    }
 }

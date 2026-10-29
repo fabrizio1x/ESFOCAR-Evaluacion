@@ -21,37 +21,31 @@ class RubricaRepository {
     )
 
     private val criterios = listOf(
-        // RUB-PP-01
         Criterio(1, 1, "Identificación verbal y control inicial del sujeto", 0.20, orden = 1),
         Criterio(2, 1, "Posicionamiento táctico y seguridad del entorno", 0.25, orden = 2),
         Criterio(3, 1, "Aplicación de técnicas de inmovilización y esposamiento", 0.30, orden = 3),
         Criterio(4, 1, "Comunicación y uso de fuerza proporcional", 0.15, orden = 4),
         Criterio(5, 1, "Registro de persona y resguardo de evidencias", 0.10, orden = 5),
-        // RUB-PP-02
         Criterio(6, 2, "Aproximación y control perimetral del vehículo", 0.20, orden = 1),
         Criterio(7, 2, "Orden de salida de ocupantes y control de personas", 0.25, orden = 2),
         Criterio(8, 2, "Inspección sistemática del habitáculo y maletero", 0.30, orden = 3),
         Criterio(9, 2, "Identificación de elementos de riesgo o ilícitos", 0.15, orden = 4),
         Criterio(10, 2, "Documentación del procedimiento y cierre seguro", 0.10, orden = 5),
-        // RUB-IF-01
         Criterio(11, 3, "Resistencia aeróbica (carrera / circuito)", 0.30, orden = 1),
         Criterio(12, 3, "Fuerza de tren superior (flexiones / tracciones)", 0.25, orden = 2),
         Criterio(13, 3, "Fuerza de tren inferior y core", 0.20, orden = 3),
         Criterio(14, 3, "Agilidad y cambio de dirección", 0.15, orden = 4),
         Criterio(15, 3, "Recuperación y control de respiración post-esfuerzo", 0.10, orden = 5),
-        // RUB-IF-02
         Criterio(16, 4, "Postura de guardia y desplazamiento base", 0.15, orden = 1),
         Criterio(17, 4, "Técnicas de bloqueo y esquiva", 0.20, orden = 2),
         Criterio(18, 4, "Control de agarres y proyección del agresor", 0.30, orden = 3),
         Criterio(19, 4, "Uso proporcional de la fuerza y desescalada", 0.20, orden = 4),
         Criterio(20, 4, "Seguridad propia y de terceros durante la intervención", 0.15, orden = 5),
-        // RUB-PT-01
         Criterio(21, 5, "Manejo seguro del arma (reglas de oro del polígono)", 0.25, orden = 1),
         Criterio(22, 5, "Postura, empuñe y alineación de miras", 0.20, orden = 2),
         Criterio(23, 5, "Precisión en serie de tiro estático", 0.30, orden = 3),
         Criterio(24, 5, "Control de gatillo y respiración", 0.15, orden = 4),
         Criterio(25, 5, "Recarga y continuidad del ejercicio", 0.10, orden = 5),
-        // RUB-PT-02
         Criterio(26, 6, "Desplazamiento seguro con arma en posición de alerta", 0.20, orden = 1),
         Criterio(27, 6, "Precisión en disparos en movimiento", 0.25, orden = 2),
         Criterio(28, 6, "Cambio de cargador bajo estrés controlado", 0.20, orden = 3),
