@@ -58,7 +58,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,6 +83,11 @@ import com.duoc.esfocar.viewmodel.CalculadoraNotas
 import com.duoc.esfocar.viewmodel.ValidadorEvaluacion
 import java.util.Locale
 
+private val GuardadoPuntajes = Saver<SnapshotStateMap<String, Double>, HashMap<String, Double>>(
+    save = { HashMap(it) },
+    restore = { guardado -> mutableStateMapOf<String, Double>().apply { putAll(guardado) } }
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EvaluacionScreen(
@@ -90,14 +97,14 @@ fun EvaluacionScreen(
     onGuardarEvaluacion: (String, Double, String, String?) -> Unit = { _, _, _, _ -> }
 ) {
     val context = LocalContext.current
-    var nombreAspirante by remember { mutableStateOf("") }
-    var observaciones by remember { mutableStateOf("") }
-    var errorAspirante by remember { mutableStateOf<String?>(null) }
-    var errorObservaciones by remember { mutableStateOf<String?>(null) }
-    var mostrarDialogoExito by remember { mutableStateOf(false) }
+    var nombreAspirante by rememberSaveable { mutableStateOf("") }
+    var observaciones by rememberSaveable { mutableStateOf("") }
+    var errorAspirante by rememberSaveable { mutableStateOf<String?>(null) }
+    var errorObservaciones by rememberSaveable { mutableStateOf<String?>(null) }
+    var mostrarDialogoExito by rememberSaveable { mutableStateOf(false) }
     var fotoRuta by rememberSaveable { mutableStateOf<String?>(null) }
     var archivoPendiente by rememberSaveable { mutableStateOf<String?>(null) }
-    var errorCamara by remember { mutableStateOf<String?>(null) }
+    var errorCamara by rememberSaveable { mutableStateOf<String?>(null) }
 
     val launcherCamara = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
@@ -124,7 +131,7 @@ fun EvaluacionScreen(
         }
     }
 
-    val puntajes = remember {
+    val puntajes = rememberSaveable(rubrica.id, saver = GuardadoPuntajes) {
         mutableStateMapOf<String, Double>().apply {
             rubrica.criterios.forEach { criterio ->
                 put(criterio.id, 7.0)

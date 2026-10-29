@@ -1,6 +1,7 @@
 package com.duoc.esfocar
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -113,5 +114,25 @@ class EvaluacionScreenTest {
     fun sinAvisoCuandoHayConexion() {
         mostrarPantalla(hayConexion = true)
         composeRule.onNodeWithText("Sin conexión: la evaluación se guardará en el teléfono y no se perderá.").assertDoesNotExist()
+    }
+
+    @Test
+    fun conservaLoEscritoAlGirarElTelefono() {
+        val restauracion = StateRestorationTester(composeRule)
+        restauracion.setContent {
+            AppEsfocar_Grupo15Theme(darkTheme = false) {
+                EvaluacionScreen(rubrica = rubrica)
+            }
+        }
+        composeRule.onNodeWithText("Nombre del Aspirante / Alumno").performScrollTo().performTextInput("Ana Rojas")
+        composeRule.onNodeWithText("Observaciones y recomendaciones").performScrollTo()
+            .performTextInput("Mantuvo el resguardo durante todo el control.")
+        composeRule.onAllNodesWithText("Insuficiente (2.0)")[0].performScrollTo().performClick()
+
+        restauracion.emulateSavedInstanceStateRestore()
+
+        composeRule.onNodeWithText("Ana Rojas").assertExists()
+        composeRule.onNodeWithText("Mantuvo el resguardo durante todo el control.").assertExists()
+        composeRule.onNodeWithText("5.75").performScrollTo().assertIsDisplayed()
     }
 }
