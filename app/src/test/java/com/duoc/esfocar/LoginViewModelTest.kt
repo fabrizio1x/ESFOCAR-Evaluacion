@@ -1,6 +1,9 @@
 package com.duoc.esfocar
 
+import com.duoc.esfocar.data.UsuarioDaoEnMemoria
+import com.duoc.esfocar.repository.UsuarioRepository
 import com.duoc.esfocar.viewmodel.LoginViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -10,9 +13,11 @@ import org.junit.Test
 
 class LoginViewModelTest {
 
+    private fun nuevoViewModel() = LoginViewModel(UsuarioRepository(UsuarioDaoEnMemoria()))
+
     @Test
     fun botonDeshabilitadoHastaTenerDatosValidos() {
-        val viewModel = LoginViewModel()
+        val viewModel = nuevoViewModel()
         assertFalse(viewModel.botonHabilitado)
         viewModel.onCorreoChange("instructor@esfocar.cl")
         assertFalse(viewModel.botonHabilitado)
@@ -22,7 +27,7 @@ class LoginViewModelTest {
 
     @Test
     fun muestraErrorAlEscribirCorreoExterno() {
-        val viewModel = LoginViewModel()
+        val viewModel = nuevoViewModel()
         viewModel.onCorreoChange("docente@gmail.com")
         assertEquals("Debes usar tu correo institucional", viewModel.errorCorreo)
         viewModel.onCorreoChange("")
@@ -30,8 +35,8 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun ingresaConCredencialesCorrectas() {
-        val viewModel = LoginViewModel()
+    fun ingresaConCredencialesCorrectas() = runBlocking {
+        val viewModel = nuevoViewModel()
         viewModel.onCorreoChange("INSTRUCTOR@esfocar.cl")
         viewModel.onContrasenaChange("instructor123")
         val usuario = viewModel.iniciarSesion()
@@ -41,8 +46,8 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun rechazaContrasenaIncorrecta() {
-        val viewModel = LoginViewModel()
+    fun rechazaContrasenaIncorrecta() = runBlocking {
+        val viewModel = nuevoViewModel()
         viewModel.onCorreoChange("instructor@esfocar.cl")
         viewModel.onContrasenaChange("otraClave1")
         assertNull(viewModel.iniciarSesion())

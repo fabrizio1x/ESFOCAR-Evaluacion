@@ -4,12 +4,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.duoc.esfocar.data.EsfocarDatabase
 import com.duoc.esfocar.model.Usuario
 import com.duoc.esfocar.repository.UsuarioRepository
 
-class RegisterViewModel : ViewModel() {
-
-    private val repository = UsuarioRepository()
+class RegisterViewModel(private val repository: UsuarioRepository) : ViewModel() {
 
     var nombre by mutableStateOf("")
         private set
@@ -34,9 +36,12 @@ class RegisterViewModel : ViewModel() {
         private set
     var errorRegistro by mutableStateOf<String?>(null)
         private set
+    var procesando by mutableStateOf(false)
+        private set
 
     val botonHabilitado: Boolean
-        get() = ValidadorRegistro.validarNombre(nombre) == null &&
+        get() = !procesando &&
+                ValidadorRegistro.validarNombre(nombre) == null &&
                 ValidadorRegistro.validarNombre(apellido, "apellido") == null &&
                 ValidadorRegistro.validarCorreo(correo) == null &&
                 ValidadorRegistro.validarContrasena(contrasena) == null &&
@@ -71,7 +76,7 @@ class RegisterViewModel : ViewModel() {
         errorConfirmacion = if (valor.isEmpty()) null else ValidadorRegistro.validarConfirmacion(contrasena, valor)
     }
 
-    fun registrar(): Usuario? {
+    suspend fun registrar(): Usuario? {
         errorNombre = ValidadorRegistro.validarNombre(nombre)
         errorApellido = ValidadorRegistro.validarNombre(apellido, "apellido")
         errorCorreo = ValidadorRegistro.validarCorreo(correo)
@@ -81,17 +86,30 @@ class RegisterViewModel : ViewModel() {
             errorContrasena != null || errorConfirmacion != null
         ) return null
 
-        if (repository.existeCorreo(correo)) {
-            errorRegistro = "Ya existe una cuenta con este correo"
-            return null
-        }
+        procesando = true
+        try {
+            if (repository.existeCorreo(correo)) {
+                errorRegistro = "Ya existe una cuenta con este correo"
+                return null
+            }
 
-        val usuario = Usuario(
-            correo = correo.trim().lowercase(),
-            contrasena = contrasena,
-            nombre = "${nombre.trim()} ${apellido.trim()}"
-        )
-        repository.registrarUsuario(usuario)
-        return usuario
+            val usuario = Usuario(
+                correo = correo.trim().lowercase(),
+                nombre = "${nombre.trim()} ${apellido.trim()}"
+            )
+            repository.registrarUsuario(usuario, contrasena)
+            return usuario
+        } finally {
+            procesando = false
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val aplicacion = checkNotNull(this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
+                RegisterViewModel(UsuarioRepository(EsfocarDatabase.obtener(aplicacion).usuarioDao()))
+            }
+        }
     }
 }

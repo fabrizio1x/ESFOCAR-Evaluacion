@@ -6,12 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.RegisterViewModel
+import kotlinx.coroutines.launch
 
 class RegisterActivity : ComponentActivity() {
 
-    private val registerViewModel: RegisterViewModel by viewModels()
+    private val registerViewModel: RegisterViewModel by viewModels { RegisterViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,14 +23,16 @@ class RegisterActivity : ComponentActivity() {
                 RegisterScreen(
                     viewModel = registerViewModel,
                     onRegisterClick = {
-                        val usuario = registerViewModel.registrar()
-                        if (usuario != null) {
-                            Toast.makeText(
-                                this,
-                                "Cuenta creada para ${usuario.nombre}. Ya puedes iniciar sesión",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            finish()
+                        lifecycleScope.launch {
+                            val usuario = registerViewModel.registrar()
+                            if (usuario != null) {
+                                Toast.makeText(
+                                    this@RegisterActivity,
+                                    "Cuenta creada para ${usuario.nombre}. Ya puedes iniciar sesión",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                finish()
+                            }
                         }
                     },
                     onBackToLoginClick = {

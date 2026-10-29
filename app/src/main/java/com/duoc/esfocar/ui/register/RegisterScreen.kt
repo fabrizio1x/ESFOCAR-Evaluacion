@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.duoc.esfocar.data.UsuarioDaoEnMemoria
+import com.duoc.esfocar.repository.UsuarioRepository
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.RegisterViewModel
 
@@ -278,7 +280,7 @@ fun RegisterScreen(
 @Composable
 fun RegisterScreenPreviewClaro() {
     AppEsfocar_Grupo15Theme(darkTheme = false) {
-        RegisterScreen(viewModel = RegisterViewModel())
+        RegisterScreen(viewModel = RegisterViewModel(UsuarioRepository(UsuarioDaoEnMemoria())))
     }
 }
 
@@ -286,6 +288,6 @@ fun RegisterScreenPreviewClaro() {
 @Composable
 fun RegisterScreenPreviewOscuro() {
     AppEsfocar_Grupo15Theme(darkTheme = true) {
-        RegisterScreen(viewModel = RegisterViewModel())
+        RegisterScreen(viewModel = RegisterViewModel(UsuarioRepository(UsuarioDaoEnMemoria())))
     }
 }

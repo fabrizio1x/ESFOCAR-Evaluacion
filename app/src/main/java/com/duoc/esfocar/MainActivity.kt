@@ -6,15 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.duoc.esfocar.ui.home.HomeActivity
 import com.duoc.esfocar.ui.login.LoginScreen
 import com.duoc.esfocar.ui.register.RegisterActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val loginViewModel: LoginViewModel by viewModels { LoginViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,13 +26,15 @@ class MainActivity : ComponentActivity() {
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginClick = {
-                        val usuario = loginViewModel.iniciarSesion()
-                        if (usuario != null) {
-                            val intent = Intent(this, HomeActivity::class.java)
-                            intent.putExtra(HomeActivity.EXTRA_NOMBRE, usuario.nombre)
-                            intent.putExtra(HomeActivity.EXTRA_CORREO, usuario.correo)
-                            startActivity(intent)
-                            finish()
+                        lifecycleScope.launch {
+                            val usuario = loginViewModel.iniciarSesion()
+                            if (usuario != null) {
+                                val intent = Intent(this@MainActivity, HomeActivity::class.java)
+                                intent.putExtra(HomeActivity.EXTRA_NOMBRE, usuario.nombre)
+                                intent.putExtra(HomeActivity.EXTRA_CORREO, usuario.correo)
+                                startActivity(intent)
+                                finish()
+                            }
                         }
                     },
                     onRegisterClick = {

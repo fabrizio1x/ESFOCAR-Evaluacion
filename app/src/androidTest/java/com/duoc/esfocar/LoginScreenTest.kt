@@ -12,6 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.duoc.esfocar.data.UsuarioDaoEnMemoria
+import com.duoc.esfocar.repository.UsuarioRepository
 import com.duoc.esfocar.ui.login.LoginScreen
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.LoginViewModel
@@ -26,7 +28,7 @@ class LoginScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val viewModel = LoginViewModel()
+    private val viewModel = LoginViewModel(UsuarioRepository(UsuarioDaoEnMemoria()))
 
     private var ingreso = false
 

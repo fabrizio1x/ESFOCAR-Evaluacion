@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.duoc.esfocar.data.UsuarioDaoEnMemoria
+import com.duoc.esfocar.repository.UsuarioRepository
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
 import com.duoc.esfocar.viewmodel.LoginViewModel
 
@@ -211,7 +213,7 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreviewClaro() {
     AppEsfocar_Grupo15Theme(darkTheme = false) {
-        LoginScreen(viewModel = LoginViewModel())
+        LoginScreen(viewModel = LoginViewModel(UsuarioRepository(UsuarioDaoEnMemoria())))
     }
 }
 
@@ -219,6 +221,6 @@ fun LoginScreenPreviewClaro() {
 @Composable
 fun LoginScreenPreviewOscuro() {
     AppEsfocar_Grupo15Theme(darkTheme = true) {
-        LoginScreen(viewModel = LoginViewModel())
+        LoginScreen(viewModel = LoginViewModel(UsuarioRepository(UsuarioDaoEnMemoria())))
     }
 }

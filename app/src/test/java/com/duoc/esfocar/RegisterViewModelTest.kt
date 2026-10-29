@@ -1,7 +1,10 @@
 package com.duoc.esfocar
 
+import com.duoc.esfocar.data.UsuarioDaoEnMemoria
+import com.duoc.esfocar.repository.UsuarioRepository
 import com.duoc.esfocar.viewmodel.LoginViewModel
 import com.duoc.esfocar.viewmodel.RegisterViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -10,6 +13,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RegisterViewModelTest {
+
+    private val repository = UsuarioRepository(UsuarioDaoEnMemoria())
 
     private fun completarFormulario(viewModel: RegisterViewModel, correo: String) {
         viewModel.onNombreChange("Camila")
@@ -20,8 +25,8 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun registraDocenteYLuegoPuedeIniciarSesion() {
-        val registro = RegisterViewModel()
+    fun registraDocenteYLuegoPuedeIniciarSesion() = runBlocking {
+        val registro = RegisterViewModel(repository)
         completarFormulario(registro, "Camila.Soto@esfocar.cl")
         assertTrue(registro.botonHabilitado)
         val usuario = registro.registrar()
@@ -29,23 +34,23 @@ class RegisterViewModelTest {
         assertEquals("camila.soto@esfocar.cl", usuario!!.correo)
         assertEquals("Camila Soto", usuario.nombre)
 
-        val login = LoginViewModel()
+        val login = LoginViewModel(repository)
         login.onCorreoChange("camila.soto@esfocar.cl")
         login.onContrasenaChange("clave2026")
         assertNotNull(login.iniciarSesion())
     }
 
     @Test
-    fun noPermiteCorreoRepetido() {
-        val registro = RegisterViewModel()
+    fun noPermiteCorreoRepetido() = runBlocking {
+        val registro = RegisterViewModel(repository)
         completarFormulario(registro, "docente@esfocar.cl")
         assertNull(registro.registrar())
         assertEquals("Ya existe una cuenta con este correo", registro.errorRegistro)
     }
 
     @Test
-    fun noRegistraSiLasContrasenasNoCoinciden() {
-        val registro = RegisterViewModel()
+    fun noRegistraSiLasContrasenasNoCoinciden() = runBlocking {
+        val registro = RegisterViewModel(repository)
         completarFormulario(registro, "pedro.rojas@esfocar.cl")
         registro.onConfirmarContrasenaChange("clave2027")
         assertFalse(registro.botonHabilitado)
@@ -54,8 +59,8 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun soloAceptaDominioEsfocarAlRegistrar() {
-        val registro = RegisterViewModel()
+    fun soloAceptaDominioEsfocarAlRegistrar() = runBlocking {
+        val registro = RegisterViewModel(repository)
         completarFormulario(registro, "profe@duocuc.cl")
         assertFalse(registro.botonHabilitado)
         assertNull(registro.registrar())
