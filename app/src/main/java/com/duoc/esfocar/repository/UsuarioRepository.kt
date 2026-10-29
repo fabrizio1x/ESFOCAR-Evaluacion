@@ -19,8 +19,4 @@ class UsuarioRepository(private val dao: UsuarioDao) {
         if (!encontrado.contrasenaCorrecta(contrasena)) return null
         return Usuario(correo = encontrado.correo, nombre = encontrado.nombre)
     }
-
-    val repo = RubricaRepository()
-    val rubricas = repo.obtenerRubricas()
-    val criterios = repo.obtenerCriteriosPorRubrica(1) // criterios de RUB-PP-01
 }

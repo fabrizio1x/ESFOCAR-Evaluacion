@@ -8,9 +8,9 @@ data class Criterio(
 
     val descripcion: String,
 
-    val ponderacion: Double,      // suma 1.0 por rúbrica
+    val ponderacion: Double,
 
-    val notaMinima: Double = 1.0, // escala institucional
+    val notaMinima: Double = 1.0,
 
     val notaMaxima: Double = 7.0,
 
