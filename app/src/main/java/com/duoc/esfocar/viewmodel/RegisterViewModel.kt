@@ -82,6 +82,14 @@ class RegisterViewModel(private val repository: UsuarioRepository) : ViewModel()
         esInstructor = valor
     }
 
+    fun seleccionarDocente() {
+        esInstructor = false
+    }
+
+    fun seleccionarInstructor() {
+        esInstructor = true
+    }
+
     suspend fun registrar(): Usuario? {
         errorNombre = ValidadorRegistro.validarNombre(nombre)
         errorApellido = ValidadorRegistro.validarNombre(apellido, "apellido")

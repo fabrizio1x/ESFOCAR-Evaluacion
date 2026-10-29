@@ -2,6 +2,7 @@ package com.duoc.esfocar.ui.register
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -232,24 +233,50 @@ fun RegisterScreen(
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                     ) {
-                        Checkbox(
-                            checked = viewModel.esInstructor,
-                            onCheckedChange = { viewModel.onTipoCargoChange(it) },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = MaterialTheme.colorScheme.primary
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { viewModel.seleccionarDocente() }
+                        ) {
+                            Checkbox(
+                                checked = !viewModel.esInstructor,
+                                onCheckedChange = { viewModel.seleccionarDocente() },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = MaterialTheme.colorScheme.primary
+                                )
                             )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (viewModel.esInstructor) "Rol: Instructor de Terreno" else "Rol: Docente de Aula",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Rol Docente",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (!viewModel.esInstructor) FontWeight.SemiBold else FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { viewModel.seleccionarInstructor() }
+                        ) {
+                            Checkbox(
+                                checked = viewModel.esInstructor,
+                                onCheckedChange = { viewModel.seleccionarInstructor() },
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Rol Instructor",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (viewModel.esInstructor) FontWeight.SemiBold else FontWeight.Normal,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
 
                     viewModel.errorRegistro?.let {
