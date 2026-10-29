@@ -14,7 +14,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.ui.res.painterResource
+import com.duoc.esfocar.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -113,7 +116,6 @@ class HomeActivity : ComponentActivity() {
 
         val nombre = intent.getStringExtra(EXTRA_NOMBRE).orEmpty()
         val correo = intent.getStringExtra(EXTRA_CORREO).orEmpty()
-
         setContent {
             val evaluaciones by evaluacionesViewModel.evaluaciones.collectAsState(initial = emptyList())
             val hayConexion by evaluacionesViewModel.hayConexion.collectAsState(initial = true)
@@ -188,10 +190,10 @@ fun HomeScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(
-                        text = "ESFOCAR",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_esfocar),
+                        contentDescription = "Logo ESFOCAR",
+                        modifier = Modifier.height(34.dp)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

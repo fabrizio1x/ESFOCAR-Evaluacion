@@ -2,9 +2,9 @@ package com.duoc.esfocar.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val VerdeInstitucional = Color(0xFF1E5631)
-val VerdeInstitucionalOscuro = Color(0xFF134223)
-val VerdeInstitucionalClaro = Color(0xFF4C8C65)
+val VerdeInstitucional = Color(0xFF1A4B23)
+val VerdeInstitucionalOscuro = Color(0xFF103317)
+val VerdeInstitucionalClaro = Color(0xFF3E754B)
 val VerdeContenedor = Color(0xFFD4EED8)
 val SobreVerdeContenedor = Color(0xFF00210C)
 
