@@ -33,11 +33,32 @@ class RegisterViewModelTest {
         assertNotNull(usuario)
         assertEquals("camila.soto@esfocar.cl", usuario!!.correo)
         assertEquals("Camila Soto", usuario.nombre)
+        assertEquals("Docente", usuario.cargo)
 
         val login = LoginViewModel(repository)
         login.onCorreoChange("camila.soto@esfocar.cl")
         login.onContrasenaChange("clave2026")
-        assertNotNull(login.iniciarSesion())
+        val logueado = login.iniciarSesion()
+        assertNotNull(logueado)
+        assertEquals("Docente", logueado!!.cargo)
+    }
+
+    @Test
+    fun registraInstructorCuandoSeSeleccionaElRol() = runBlocking {
+        val registro = RegisterViewModel(repository)
+        completarFormulario(registro, "manuel.perez@esfocar.cl")
+        registro.seleccionarInstructor()
+        assertTrue(registro.esInstructor)
+        val usuario = registro.registrar()
+        assertNotNull(usuario)
+        assertEquals("Instructor", usuario!!.cargo)
+
+        val login = LoginViewModel(repository)
+        login.onCorreoChange("manuel.perez@esfocar.cl")
+        login.onContrasenaChange("clave2026")
+        val logueado = login.iniciarSesion()
+        assertNotNull(logueado)
+        assertEquals("Instructor", logueado!!.cargo)
     }
 
     @Test

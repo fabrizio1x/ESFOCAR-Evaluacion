@@ -42,6 +42,7 @@ class LoginViewModelTest {
         val usuario = viewModel.iniciarSesion()
         assertNotNull(usuario)
         assertEquals("Instructor Demo", usuario!!.nombre)
+        assertEquals("Instructor", usuario.cargo)
         assertNull(viewModel.errorCredenciales)
     }
 

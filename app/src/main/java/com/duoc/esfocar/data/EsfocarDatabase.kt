@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [EvaluacionEntity::class, UsuarioEntity::class, DocumentoEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class EsfocarDatabase : RoomDatabase() {
@@ -50,12 +50,18 @@ abstract class EsfocarDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRACION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `usuarios` ADD COLUMN `cargo` TEXT NOT NULL DEFAULT 'Docente'")
+            }
+        }
+
         val CUENTAS_DEMO = object : RoomDatabase.Callback() {
             override fun onOpen(db: SupportSQLiteDatabase) {
                 UsuariosDemo.entidades().forEach { usuario ->
                     db.execSQL(
-                        "INSERT OR IGNORE INTO usuarios (correo, nombre, hashContrasena, sal) VALUES (?, ?, ?, ?)",
-                        arrayOf(usuario.correo, usuario.nombre, usuario.hashContrasena, usuario.sal)
+                        "INSERT OR IGNORE INTO usuarios (correo, nombre, cargo, hashContrasena, sal) VALUES (?, ?, ?, ?, ?)",
+                        arrayOf(usuario.correo, usuario.nombre, usuario.cargo, usuario.hashContrasena, usuario.sal)
                     )
                 }
             }
@@ -68,7 +74,7 @@ abstract class EsfocarDatabase : RoomDatabase() {
                     EsfocarDatabase::class.java,
                     "esfocar.db"
                 )
-                    .addMigrations(MIGRACION_1_2, MIGRACION_2_3)
+                    .addMigrations(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4)
                     .addCallback(CUENTAS_DEMO)
                     .build()
                     .also { instancia = it }

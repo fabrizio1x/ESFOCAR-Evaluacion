@@ -32,6 +32,7 @@ class MainActivity : ComponentActivity() {
                                 val intent = Intent(this@MainActivity, HomeActivity::class.java)
                                 intent.putExtra(HomeActivity.EXTRA_NOMBRE, usuario.nombre)
                                 intent.putExtra(HomeActivity.EXTRA_CORREO, usuario.correo)
+                                intent.putExtra(HomeActivity.EXTRA_CARGO, usuario.cargo)
                                 startActivity(intent)
                                 finish()
                             }

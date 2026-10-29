@@ -105,6 +105,7 @@ class HomeActivity : ComponentActivity() {
     companion object {
         const val EXTRA_NOMBRE = "nombre"
         const val EXTRA_CORREO = "correo"
+        const val EXTRA_CARGO = "cargo"
     }
 
     private val evaluacionesViewModel: EvaluacionesViewModel by viewModels()
@@ -116,6 +117,8 @@ class HomeActivity : ComponentActivity() {
 
         val nombre = intent.getStringExtra(EXTRA_NOMBRE).orEmpty()
         val correo = intent.getStringExtra(EXTRA_CORREO).orEmpty()
+        val cargo = intent.getStringExtra(EXTRA_CARGO).orEmpty().ifBlank { "Docente" }
+
         setContent {
             val evaluaciones by evaluacionesViewModel.evaluaciones.collectAsState(initial = emptyList())
             val hayConexion by evaluacionesViewModel.hayConexion.collectAsState(initial = true)
@@ -125,6 +128,7 @@ class HomeActivity : ComponentActivity() {
                 HomeScreen(
                     nombre = nombre,
                     correo = correo,
+                    cargo = cargo,
                     evaluaciones = evaluaciones,
                     hayConexion = hayConexion,
                     documentos = documentos,
@@ -164,6 +168,7 @@ enum class HomeTab(val titulo: String, val icon: ImageVector) {
 fun HomeScreen(
     nombre: String = "",
     correo: String = "",
+    cargo: String = "Docente",
     evaluaciones: List<EvaluacionEntity> = emptyList(),
     hayConexion: Boolean = true,
     documentos: List<DocumentoEntity> = emptyList(),
@@ -177,7 +182,7 @@ fun HomeScreen(
     var menuDesplegado by remember { mutableStateOf(false) }
     var nombreUsuario by rememberSaveable { mutableStateOf(if (nombre.isNotBlank()) nombre else "Docente") }
     var sedeUsuario by rememberSaveable { mutableStateOf("Santiago") }
-    var cargoUsuario by rememberSaveable { mutableStateOf("Instructor") }
+    var cargoUsuario by rememberSaveable { mutableStateOf(if (cargo.isNotBlank()) cargo else "Docente") }
 
     val launcherDocumento = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -817,7 +822,8 @@ fun HomeScreenPreview() {
     AppEsfocar_Grupo15Theme(darkTheme = false) {
         HomeScreen(
             nombre = "Instructor Demo",
-            correo = "instructor@esfocar.cl"
+            correo = "instructor@esfocar.cl",
+            cargo = "Instructor"
         )
     }
 }

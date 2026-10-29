@@ -11,12 +11,16 @@ class UsuarioRepository(private val dao: UsuarioDao) {
     }
 
     suspend fun registrarUsuario(usuario: Usuario, contrasena: String) {
-        dao.insertar(UsuarioEntity.crear(usuario.correo, usuario.nombre, contrasena))
+        dao.insertar(UsuarioEntity.crear(usuario.correo, usuario.nombre, contrasena, usuario.cargo))
     }
 
     suspend fun buscarUsuario(correo: String, contrasena: String): Usuario? {
         val encontrado = dao.buscarPorCorreo(correo.trim()) ?: return null
         if (!encontrado.contrasenaCorrecta(contrasena)) return null
-        return Usuario(correo = encontrado.correo, nombre = encontrado.nombre)
+        return Usuario(
+            correo = encontrado.correo,
+            nombre = encontrado.nombre,
+            cargo = encontrado.cargo
+        )
     }
 }

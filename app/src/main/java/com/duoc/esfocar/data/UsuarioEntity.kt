@@ -8,6 +8,7 @@ data class UsuarioEntity(
     @PrimaryKey
     val correo: String,
     val nombre: String,
+    val cargo: String = "Docente",
     val hashContrasena: String,
     val sal: String
 ) {
@@ -16,11 +17,17 @@ data class UsuarioEntity(
     }
 
     companion object {
-        fun crear(correo: String, nombre: String, contrasena: String): UsuarioEntity {
+        fun crear(
+            correo: String,
+            nombre: String,
+            contrasena: String,
+            cargo: String = "Docente"
+        ): UsuarioEntity {
             val sal = CifradoContrasena.generarSal()
             return UsuarioEntity(
                 correo = correo.trim().lowercase(),
                 nombre = nombre.trim(),
+                cargo = cargo.trim(),
                 hashContrasena = CifradoContrasena.cifrar(contrasena, sal),
                 sal = sal
             )

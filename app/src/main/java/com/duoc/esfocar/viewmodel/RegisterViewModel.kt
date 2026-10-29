@@ -107,9 +107,11 @@ class RegisterViewModel(private val repository: UsuarioRepository) : ViewModel()
                 return null
             }
 
+            val cargo = if (esInstructor) "Instructor" else "Docente"
             val usuario = Usuario(
                 correo = correo.trim().lowercase(),
-                nombre = "${nombre.trim()} ${apellido.trim()}"
+                nombre = "${nombre.trim()} ${apellido.trim()}",
+                cargo = cargo
             )
             repository.registrarUsuario(usuario, contrasena)
             return usuario
