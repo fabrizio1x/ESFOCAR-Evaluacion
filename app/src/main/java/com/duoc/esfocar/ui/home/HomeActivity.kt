@@ -3,7 +3,6 @@ package com.duoc.esfocar.ui.home
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -73,7 +72,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -87,10 +85,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.esfocar.MainActivity
+import com.duoc.esfocar.data.DocumentoEntity
 import com.duoc.esfocar.data.EvaluacionEntity
+import com.duoc.esfocar.recursos.AlmacenDocumentos
 import com.duoc.esfocar.ui.aspirante.FichaAspiranteActivity
 import com.duoc.esfocar.ui.rubricas.RubricasActivity
 import com.duoc.esfocar.ui.theme.AppEsfocar_Grupo15Theme
+import com.duoc.esfocar.viewmodel.DocumentosViewModel
 import com.duoc.esfocar.viewmodel.EvaluacionesViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -104,6 +105,7 @@ class HomeActivity : ComponentActivity() {
     }
 
     private val evaluacionesViewModel: EvaluacionesViewModel by viewModels()
+    private val documentosViewModel: DocumentosViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +117,7 @@ class HomeActivity : ComponentActivity() {
         setContent {
             val evaluaciones by evaluacionesViewModel.evaluaciones.collectAsState(initial = emptyList())
             val hayConexion by evaluacionesViewModel.hayConexion.collectAsState(initial = true)
+            val documentos by documentosViewModel.documentos.collectAsState(initial = emptyList())
 
             AppEsfocar_Grupo15Theme {
                 HomeScreen(
@@ -122,6 +125,22 @@ class HomeActivity : ComponentActivity() {
                     correo = correo,
                     evaluaciones = evaluaciones,
                     hayConexion = hayConexion,
+                    documentos = documentos,
+                    onCargarDocumento = { uri ->
+                        documentosViewModel.cargar(uri) { mensaje ->
+                            Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onVisualizarDocumento = { documento ->
+                        if (!AlmacenDocumentos.abrir(this, documento)) {
+                            Toast.makeText(this, "No hay una aplicación para abrir ${documento.nombre}", Toast.LENGTH_LONG).show()
+                        }
+                    },
+                    onEliminarDocumento = { documento ->
+                        documentosViewModel.eliminar(documento) {
+                            Toast.makeText(this, "Documento eliminado", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                     onCerrarSesion = {
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
@@ -138,14 +157,6 @@ enum class HomeTab(val titulo: String, val icon: ImageVector) {
     PERFIL("Perfil", Icons.Filled.Person)
 }
 
-data class DocumentoItem(
-    val id: String,
-    val nombre: String,
-    val fecha: String,
-    val esPdf: Boolean,
-    val uriString: String? = null
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -153,6 +164,10 @@ fun HomeScreen(
     correo: String = "",
     evaluaciones: List<EvaluacionEntity> = emptyList(),
     hayConexion: Boolean = true,
+    documentos: List<DocumentoEntity> = emptyList(),
+    onCargarDocumento: (Uri) -> Unit = {},
+    onVisualizarDocumento: (DocumentoEntity) -> Unit = {},
+    onEliminarDocumento: (DocumentoEntity) -> Unit = {},
     onCerrarSesion: () -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -162,52 +177,10 @@ fun HomeScreen(
     var sedeUsuario by rememberSaveable { mutableStateOf("Santiago") }
     var cargoUsuario by rememberSaveable { mutableStateOf("Instructor") }
 
-    val documentos = remember {
-        mutableStateListOf(
-            DocumentoItem(
-                id = "doc-1",
-                nombre = "Pauta_Control_Transito_Vehicular.pdf",
-                fecha = "20-10-2026",
-                esPdf = true
-            ),
-            DocumentoItem(
-                id = "doc-2",
-                nombre = "Rubrica_Procedimientos_Seguridad.docx",
-                fecha = "18-10-2026",
-                esPdf = false
-            )
-        )
-    }
-
     val launcherDocumento = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
-        uri?.let {
-            var nombreArchivo = "Documento_${System.currentTimeMillis()}"
-            context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
-                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                if (nameIndex != -1 && cursor.moveToFirst()) {
-                    nombreArchivo = cursor.getString(nameIndex)
-                }
-            }
-
-            val esPdf = nombreArchivo.lowercase(Locale.ROOT).endsWith(".pdf")
-            val formatoFecha = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val fechaActual = formatoFecha.format(Date())
-
-            documentos.add(
-                0,
-                DocumentoItem(
-                    id = "doc-${System.currentTimeMillis()}",
-                    nombre = nombreArchivo,
-                    fecha = fechaActual,
-                    esPdf = esPdf,
-                    uriString = it.toString()
-                )
-            )
-
-            Toast.makeText(context, "Documento cargado: $nombreArchivo", Toast.LENGTH_SHORT).show()
-        }
+        uri?.let(onCargarDocumento)
     }
 
     Scaffold(
@@ -327,21 +300,10 @@ fun HomeScreen(
                     HomeTab.DOCUMENTOS -> TabDocumentos(
                         documentos = documentos,
                         onCargarClick = {
-                            launcherDocumento.launch(
-                                arrayOf(
-                                    "application/pdf",
-                                    "application/msword",
-                                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                )
-                            )
+                            launcherDocumento.launch(AlmacenDocumentos.TIPOS_PERMITIDOS)
                         },
-                        onVisualizarClick = { doc ->
-                            Toast.makeText(context, "Visualizando: ${doc.nombre}", Toast.LENGTH_SHORT).show()
-                        },
-                        onEliminarClick = { doc ->
-                            documentos.remove(doc)
-                            Toast.makeText(context, "Documento eliminado", Toast.LENGTH_SHORT).show()
-                        }
+                        onVisualizarClick = onVisualizarDocumento,
+                        onEliminarClick = onEliminarDocumento
                     )
                     HomeTab.PERFIL -> TabPerfil(
                         nombre = nombreUsuario,
@@ -514,10 +476,10 @@ fun TarjetaEvaluacion(
 
 @Composable
 fun TabDocumentos(
-    documentos: List<DocumentoItem>,
+    documentos: List<DocumentoEntity>,
     onCargarClick: () -> Unit,
-    onVisualizarClick: (DocumentoItem) -> Unit,
-    onEliminarClick: (DocumentoItem) -> Unit
+    onVisualizarClick: (DocumentoEntity) -> Unit,
+    onEliminarClick: (DocumentoEntity) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -617,7 +579,7 @@ fun TabDocumentos(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = "Cargado el: ${doc.fecha}",
+                                    text = "Cargado el: ${formatearFechaDocumento(doc.fecha)}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -856,4 +818,8 @@ fun HomeScreenPreview() {
             correo = "instructor@esfocar.cl"
         )
     }
+}
+
+fun formatearFechaDocumento(fecha: Long): String {
+    return SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(Date(fecha))
 }

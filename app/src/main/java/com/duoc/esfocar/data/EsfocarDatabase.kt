@@ -8,8 +8,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [EvaluacionEntity::class, UsuarioEntity::class],
-    version = 2,
+    entities = [EvaluacionEntity::class, UsuarioEntity::class, DocumentoEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class EsfocarDatabase : RoomDatabase() {
@@ -17,6 +17,8 @@ abstract class EsfocarDatabase : RoomDatabase() {
     abstract fun evaluacionDao(): EvaluacionDao
 
     abstract fun usuarioDao(): UsuarioDao
+
+    abstract fun documentoDao(): DocumentoDao
 
     companion object {
         @Volatile
@@ -31,6 +33,19 @@ abstract class EsfocarDatabase : RoomDatabase() {
                         "`hashContrasena` TEXT NOT NULL, " +
                         "`sal` TEXT NOT NULL, " +
                         "PRIMARY KEY(`correo`))"
+                )
+            }
+        }
+
+        val MIGRACION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `documentos` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`nombre` TEXT NOT NULL, " +
+                        "`ruta` TEXT NOT NULL, " +
+                        "`tipoMime` TEXT NOT NULL, " +
+                        "`fecha` INTEGER NOT NULL)"
                 )
             }
         }
@@ -53,7 +68,7 @@ abstract class EsfocarDatabase : RoomDatabase() {
                     EsfocarDatabase::class.java,
                     "esfocar.db"
                 )
-                    .addMigrations(MIGRACION_1_2)
+                    .addMigrations(MIGRACION_1_2, MIGRACION_2_3)
                     .addCallback(CUENTAS_DEMO)
                     .build()
                     .also { instancia = it }

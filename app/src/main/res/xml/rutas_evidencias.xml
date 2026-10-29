@@ -3,4 +3,7 @@
     <files-path
         name="evidencias"
         path="evidencias/" />
+    <files-path
+        name="documentos"
+        path="documentos/" />
 </paths>
