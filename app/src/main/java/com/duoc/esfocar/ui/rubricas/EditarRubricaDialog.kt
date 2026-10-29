@@ -13,7 +13,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -26,9 +26,9 @@ fun EditarRubricaDialog(
     onDismissRequest: () -> Unit,
     onConfirmarEdicion: (RubricaItem) -> Unit
 ) {
-    var titulo by remember { mutableStateOf(rubrica.titulo) }
-    var descripcion by remember { mutableStateOf(rubrica.descripcion) }
-    var tiempoTexto by remember { mutableStateOf(rubrica.tiempoEstimadoMinutos.toString()) }
+    var titulo by rememberSaveable { mutableStateOf(rubrica.titulo) }
+    var descripcion by rememberSaveable { mutableStateOf(rubrica.descripcion) }
+    var tiempoTexto by rememberSaveable { mutableStateOf(rubrica.tiempoEstimadoMinutos.toString()) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,

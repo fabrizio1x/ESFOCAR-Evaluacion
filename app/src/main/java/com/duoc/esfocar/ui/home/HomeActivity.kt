@@ -621,9 +621,9 @@ fun EditarPerfilDialog(
     onDismissRequest: () -> Unit,
     onConfirmarEdicion: (nombre: String, sede: String, cargo: String) -> Unit
 ) {
-    var nombre by remember { mutableStateOf(nombreActual) }
-    var sede by remember { mutableStateOf(sedeActual) }
-    var cargo by remember { mutableStateOf(cargoActual) }
+    var nombre by rememberSaveable { mutableStateOf(nombreActual) }
+    var sede by rememberSaveable { mutableStateOf(sedeActual) }
+    var cargo by rememberSaveable { mutableStateOf(cargoActual) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -688,7 +688,7 @@ fun TabPerfil(
     onGuardarPerfil: (nombre: String, sede: String, cargo: String) -> Unit,
     onCerrarSesion: () -> Unit
 ) {
-    var mostrarDialogoEditar by remember { mutableStateOf(false) }
+    var mostrarDialogoEditar by rememberSaveable { mutableStateOf(false) }
 
     if (mostrarDialogoEditar) {
         EditarPerfilDialog(

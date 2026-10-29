@@ -40,7 +40,8 @@ class UsuarioDaoTest {
     @Test
     fun lasCuentasDemoQuedanDisponibles() = runBlocking {
         val usuario = repository.buscarUsuario("instructor@esfocar.cl", "instructor123")
-        assertEquals(Usuario("instructor@esfocar.cl", "Instructor Demo"), usuario)
+        assertEquals(Usuario("instructor@esfocar.cl", "Instructor Demo", "Instructor"), usuario)
+        assertEquals("Docente", repository.buscarUsuario("docente@esfocar.cl", "docente123")?.cargo)
         assertTrue(repository.existeCorreo("EVALUADOR@duocuc.cl"))
     }
 
